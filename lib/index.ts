@@ -7,4 +7,8 @@ export class Xapi {
     this.accountId = accountId;
     console.log("Initialized");
   }
+
+  init(){
+    console.log("Initialized again ....");
+  }
 }
