@@ -1,0 +1,33 @@
+{
+  "name": "xoh-xapi",
+  "version": "1.0.0",
+  "description": "X Open Hub API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prepublish": "npm run build",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PeterNdomano/xoh-xapi.git"
+  },
+  "keywords": [
+    "api",
+    "Forex",
+    "Trading",
+    "xtb",
+    "stocks",
+    "crypto"
+  ],
+  "author": "peterndomano",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PeterNdomano/xoh-xapi/issues"
+  },
+  "homepage": "https://github.com/PeterNdomano/xoh-xapi#readme",
+  "devDependencies": {
+    "typescript": "^4.5.5"
+  }
+}
