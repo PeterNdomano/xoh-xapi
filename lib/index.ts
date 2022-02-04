@@ -6,18 +6,25 @@ export interface Account {
 }
 
 export class Xapi {
-  password: string;
-  accountId: string;
+  private password: string;
+  private accountId: string;
+  private type: string;
+  private broker: string;
+  private sessionId: string;
 
   constructor(args: Account ) {
     let {
       password,
       accountId,
+      type = 'demo',
+      broker = 'xtb' ,
     } = args;
 
     this.password = password;
     this.accountId = accountId;
-    console.log(this.password);
+    this.type = (type === 'demo' || type === 'real') ? type : 'demo';
+    this.broker = (broker === 'xoh' || broker === 'xtb') ? broker : 'xtb';
+
   }
 
   init(){
