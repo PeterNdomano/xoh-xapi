@@ -5,3 +5,5 @@ let x = new XOH.Xapi({
   password: "test Pwd",
   type: "real",
 });
+
+x.login();
