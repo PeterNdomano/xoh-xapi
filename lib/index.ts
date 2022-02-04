@@ -12,15 +12,36 @@ export interface REQUEST_BODY {
 }
 
 
-export class SocketManager(){
+export class SocketManager {
+  protected host: string;
+  protected webSocket: WebSocket;
 
+  constructor(host: string){
+    this.host = host;
+    this.webSocket = new WebSocket(this.host);
+
+    this.webSocket.onopen = function(e){
+      console.log('Connected to the server');
+    };
+
+    this.webSocket.onmessage = function(e){
+      console.log(e.data);
+    }
+  }
+
+
+  send( body: string ){
+    this.webSocket.send(body);
+  }
 }
 
 export class Request {
   protected body: REQUEST_BODY;
+  protected socketManager: SocketManager;
 
-  constructor(body: REQUEST_BODY ) {
+  constructor(socketManager: SocketManager, body: REQUEST_BODY ) {
     this.body = body;
+    this.socketManager = socketManager;
   }
 
   isValid(){
@@ -35,7 +56,7 @@ export class Request {
       if(this.isValid()){
         try{
           let body = JSON.stringify(this.body);
-
+          this.socketManager.send(body);
         }
         catch(e){
           reject(e);
@@ -54,8 +75,8 @@ export class Xapi {
   private accountId: string;
   private type: string;
   private broker: string;
-  private streamSessionId: string;
-  private loginStatus: boolean;
+  private streamSessionId?: string;
+  private loginStatus?: boolean;
   private host: string;
   private socketManager: SocketManager;
 
@@ -77,32 +98,28 @@ export class Xapi {
       if(this.type === 'demo'){
         this.host = "wss://ws.xapi.pro/demo";
       }
-      else if(this.type === 'real'){
+      else{
         this.host = "wss://ws.xapi.pro/real";
-      }
-      else{
-        this.host = null;
-      }
-    }
-    else if(this.broker === 'xtb'){
-      if(this.type === 'demo'){
-        this.host = "wss://ws.xtb.com/demo";
-      }
-      else if(this.type === 'real'){
-        this.host = "wss://ws.xtb.com/real";
-      }
-      else{
-        this.host = null;
       }
     }
     else{
-      this.host = null;
+      if(this.type === 'demo'){
+        this.host = "wss://ws.xtb.com/demo";
+      }
+      else{
+        this.host = "wss://ws.xtb.com/real";
+      }
     }
+
+    //setup asocket manager
+    this.socketManager = new SocketManager(this.host);
+
+    this.login();
 
   }
 
   private login(){
-    let request = new Request(this.host, { command: "login", arguments: { "userId": 2} })
+    let request = new Request(this.socketManager, { command: "login", arguments: { "userId": 2} })
     request.send();
   }
 }
