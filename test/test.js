@@ -1,4 +1,6 @@
-import Xapi from './index';
+const XOH = require('../dist/index.js');
 
-let x  = new Xapi("jjjjj", "kkkkk");
-x.init();
+let x = new XOH.Xapi({
+  accountId: "test",
+  password: "test Pwd",
+});
