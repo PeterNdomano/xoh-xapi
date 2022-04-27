@@ -15,6 +15,7 @@ export interface REQUEST_BODY {
 }
 
 
+
 export class SocketManager {
   protected host: string;
   protected webSocket: WebSocket;
@@ -103,6 +104,7 @@ export class Xapi {
     this.accountId = accountId;
     this.type = (type === 'demo' || type === 'real') ? type : 'demo';
     this.broker = (broker === 'xoh' || broker === 'xtb') ? broker : 'xtb';
+    this.loginStatus = false;
 
     //set host url
     if(this.broker === 'xoh'){
@@ -124,20 +126,54 @@ export class Xapi {
 
     //setup asocket manager
     this.socketManager = new SocketManager(this.host);
+  }
 
-    this.login();
-
+  private onReady = (onReady: Function, onError: Function) => {
+    if(this.loginStatus){
+      onReady();
+    }
+    else{
+      this.login().then(
+        (data) => {
+          //login success
+          let response = JSON.parse(<string>data);
+          if(response.status === true){
+            onReady();
+          }
+          else{
+            onError( new Error(response.errorCode+": "+response.errorDescr) );
+          }
+        },
+        (error) => {
+          //error in login process
+          onError(error);
+        }
+      );
+    }
   }
 
   private login = () => {
     return (
       new Promise((resolved, rejected) => {
-        let request = new Request(this.socketManager, { command: "login", arguments: { "userId": 2} })
+        let request = new Request(this.socketManager, {
+          command: "login",
+          arguments: {
+            "userId": this.accountId,
+            "password": this.password
+          }
+        })
         request.send().then(
-          (response) => {
-            resolved(response)
+          (data) => {
+            //fulfilled
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              this.streamSessionId = response.streamSessionId;
+              this.loginStatus = true;
+            }
+            resolved(data)
           },
           (error) => {
+            //failed
             rejected(error);
           }
         )
