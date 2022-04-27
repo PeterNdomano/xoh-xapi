@@ -1,14 +1,12 @@
 const XOH = require('../dist/index.js');
 
 let x = new XOH.Xapi({
-  accountId: "test",
-  password: "test Pwd",
-  type: "real",
+  accountId: "13356926",
+  password: "DemoTest123",
+  type: "demo",
+  broker: "xtb",
 });
 
-(
-  async () => {
-    let response = await x.login();
-    console.log(response);
-  }
-)();
+x.onReady(() => {
+  console.log('Welcome');
+});
