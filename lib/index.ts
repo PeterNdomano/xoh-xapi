@@ -1,4 +1,6 @@
-import WebSocket from 'ws';
+import { WebSocket } from 'ws';
+
+
 export interface ACCOUNT {
   accountId: string; //trading account ID
   password: string; //trading account password
@@ -20,19 +22,25 @@ export class SocketManager {
   constructor(host: string){
     this.host = host;
     this.webSocket = new WebSocket(this.host);
-
-    this.webSocket.onopen = function(e){
-      console.log('Connected to the server');
-    };
-
-    this.webSocket.onmessage = function(e){
-      console.log(e.data);
-    }
   }
 
 
-  send( body: string ){
-    this.webSocket.send(body);
+  send = ( body: string ) => {
+    return (
+      new Promise((resolve, reject) => {
+        this.webSocket.onopen = () => {
+          this.webSocket.send(body);
+        }
+
+        this.webSocket.onmessage = (e) => {
+          resolve(e.data);
+        }
+
+        this.webSocket.onerror = (error) => {
+          reject(error);
+        }
+      })
+    );
   }
 }
 
@@ -52,23 +60,24 @@ export class Request {
     return false;
   }
 
-  send(){
-    let sender = new Promise((resolve, reject) => {
-      if(this.isValid()){
-        try{
-          let body = JSON.stringify(this.body);
-          this.socketManager.send(body);
+  send = () => {
+    return (
+      new Promise(async (resolve, reject) => {
+        if(this.isValid()){
+          try{
+            let body = JSON.stringify(this.body);
+            let response = await this.socketManager.send(body);
+            resolve(response);
+          }
+          catch(e){
+            reject(e);
+          }
         }
-        catch(e){
-          console.log(e);
-          reject(e);
+        else{
+          reject(new Error('Invalid request body or url'));
         }
-      }
-      else{
-        reject(new Error('Invalid request body or url'));
-      }
-    })
-
+      })
+    );
   }
 }
 
@@ -120,8 +129,19 @@ export class Xapi {
 
   }
 
-  private login(){
-    let request = new Request(this.socketManager, { command: "login", arguments: { "userId": 2} })
-    request.send();
+  private login = () => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.socketManager, { command: "login", arguments: { "userId": 2} })
+        request.send().then(
+          (response) => {
+            resolved(response)
+          },
+          (error) => {
+            rejected(error);
+          }
+        )
+      })
+    );
   }
 }
