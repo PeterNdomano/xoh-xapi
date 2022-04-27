@@ -1,14 +1,15 @@
+import WebSocket from 'ws';
 export interface ACCOUNT {
-  accountId: string;
-  password: string;
-  type?: string;
-  broker?: string;
+  accountId: string; //trading account ID
+  password: string; //trading account password
+  type?: string; //can be demo or real (demo)
+  broker?: string; //can be xtb or xoh (xtb)
 }
 
 export interface REQUEST_BODY {
-  command: string;
-  arguments?: { };
-  customTag?: number;
+  command: string; //command to be executed on the server
+  arguments?: { }; //arguments for a particular request
+  customTag?: number; //Returned exactly as it is by the server
 }
 
 
@@ -59,6 +60,7 @@ export class Request {
           this.socketManager.send(body);
         }
         catch(e){
+          console.log(e);
           reject(e);
         }
       }

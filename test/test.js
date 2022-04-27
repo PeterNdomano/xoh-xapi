@@ -1,5 +1,5 @@
 const XOH = require('../dist/index.js');
-const WebSocket = require('ws');
+
 
 let x = new XOH.Xapi({
   accountId: "test",
