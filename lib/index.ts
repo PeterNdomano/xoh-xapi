@@ -3,6 +3,7 @@ import SYMBOL_RECORD from './data-formats/SymbolRecord';
 import CALENDAR_RECORD from './data-formats/CalendarRecord';
 import CHART_LAST_INFO_RECORD from './data-formats/ChartLastInfoRecord';
 import RATE_INFO_RECORD from './data-formats/RateInfoRecord';
+import CHART_RANGE_INFO_RECORD from './data-formats/ChartRangeInfoRecord';
 
 
 export interface ACCOUNT {
@@ -338,6 +339,87 @@ export class Xapi {
             let response = JSON.parse(<string>data);
             if(response.status === true){
               resolved(<Array<RATE_INFO_RECORD>> response.returnData.rateInfos); //skipped digits from response.returnData.digits
+            }
+            else{
+              rejected(new Error(response.errorCode+": "+response.errorDescr));
+            }
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
+  private getChartRangeRequest = (info : CHART_RANGE_INFO_RECORD) => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "getChartRangeRequest",
+          arguments: {
+            info,
+          }
+        })
+        request.send().then(
+          (data) => {
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved(<Array<RATE_INFO_RECORD>> response.returnData.rateInfos); //skipped digits from response.returnData.digits
+            }
+            else{
+              rejected(new Error(response.errorCode+": "+response.errorDescr));
+            }
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
+  private getCommissionDef = (symbol: string, volume: number) => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "getCommissionDef",
+          arguments: {
+            symbol, volume,
+          }
+        })
+        request.send().then(
+          (data) => {
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved( response.returnData );
+            }
+            else{
+              rejected(new Error(response.errorCode+": "+response.errorDescr));
+            }
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
+  private getCurrentUserData = () => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "getCurrentUserData"
+        })
+        request.send().then(
+          (data) => {
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved( response.returnData );
             }
             else{
               rejected(new Error(response.errorCode+": "+response.errorDescr));
