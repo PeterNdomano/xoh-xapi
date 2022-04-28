@@ -17,28 +17,13 @@ export interface REQUEST_BODY {
 
 
 export class SocketManager {
-  protected host: string;
-  protected webSocket: WebSocket;
-
-  constructor(host: string){
-    this.host = host;
-    this.webSocket = new WebSocket(this.host);
-  }
-
-
-  send = ( body: string ) => {
+  static send = ( webSocket: WebSocket, body: string ) => {
     return (
       new Promise((resolve, reject) => {
-        this.webSocket.onopen = () => {
-          this.webSocket.send(body);
-        }
+        webSocket.send(body);
 
-        this.webSocket.onmessage = (e) => {
+        webSocket.onmessage = (e) => {
           resolve(e.data);
-        }
-
-        this.webSocket.onerror = (error) => {
-          reject(error);
         }
       })
     );
@@ -46,12 +31,13 @@ export class SocketManager {
 }
 
 export class Request {
+  protected webSocket: WebSocket;
   protected body: REQUEST_BODY;
-  protected socketManager: SocketManager;
 
-  constructor(socketManager: SocketManager, body: REQUEST_BODY ) {
+
+  constructor(webSocket: WebSocket, body: REQUEST_BODY ) {
     this.body = body;
-    this.socketManager = socketManager;
+    this.webSocket = webSocket;
   }
 
   isValid(){
@@ -67,7 +53,7 @@ export class Request {
         if(this.isValid()){
           try{
             let body = JSON.stringify(this.body);
-            let response = await this.socketManager.send(body);
+            let response = await SocketManager.send(this.webSocket, body);
             resolve(response);
           }
           catch(e){
@@ -90,8 +76,12 @@ export class Xapi {
   private streamSessionId?: string;
   private loginStatus?: boolean;
   private host: string;
-  private socketManager: SocketManager;
+  private webSocket: WebSocket;
 
+  /**
+   * Main Object for API communication
+   * @constructor
+   */
   constructor(args: ACCOUNT ) {
     let {
       password,
@@ -105,6 +95,7 @@ export class Xapi {
     this.type = (type === 'demo' || type === 'real') ? type : 'demo';
     this.broker = (broker === 'xoh' || broker === 'xtb') ? broker : 'xtb';
     this.loginStatus = false;
+
 
     //set host url
     if(this.broker === 'xoh'){
@@ -124,38 +115,60 @@ export class Xapi {
       }
     }
 
-    //setup asocket manager
-    this.socketManager = new SocketManager(this.host);
+    //set websocket
+    this.webSocket = new WebSocket(this.host);
   }
 
+
+  /**
+   * Used to start session with the server
+   * @param {Function} onReady - Function to run when everything is ready
+   * @param {Function} onError - Function to run when errors happen during initialization with Error object carrying the message
+   */
   private onReady = (onReady: Function, onError: Function) => {
     if(this.loginStatus){
       onReady();
     }
     else{
-      this.login().then(
-        (data) => {
-          //login success
-          let response = JSON.parse(<string>data);
-          if(response.status === true){
-            onReady();
+      this.webSocket.onopen = () => {
+        this.login().then(
+          (data) => {
+            //login success
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              onReady();
+            }
+            else{
+              onError( new Error(response.errorCode+": "+response.errorDescr) );
+            }
+          },
+          (error) => {
+            //error in login process
+            onError(error);
           }
-          else{
-            onError( new Error(response.errorCode+": "+response.errorDescr) );
-          }
-        },
-        (error) => {
-          //error in login process
-          onError(error);
-        }
-      );
+        );
+      }
+
+      this.webSocket.onerror = (e) => {
+        this.loginStatus = false;
+        onError(e.message);
+      }
+
+      this.webSocket.onclose = (e) => {
+        this.loginStatus = false;
+        onError(new Error("Communication to the server was closed"));
+      }
     }
   }
 
+
+  /**
+   * Used for login to the trading server
+   */
   private login = () => {
     return (
       new Promise((resolved, rejected) => {
-        let request = new Request(this.socketManager, {
+        let request = new Request(this.webSocket, {
           command: "login",
           arguments: {
             "userId": this.accountId,
@@ -180,4 +193,75 @@ export class Xapi {
       })
     );
   }
+
+
+  /**
+   * Logs out the user/client
+   */
+  private logOut = () => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "logout"
+        })
+        request.send().then(
+          (data) => {
+            //fulfilled
+            resolved(data)
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
+  /**
+   * Returns array of all symbols available for the user
+   */
+  private getAllSymbols = () => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "getAllSymbols"
+        })
+        request.send().then(
+          (data) => {
+            //fulfilled
+            resolved(data)
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
+  /**
+   * Returns calendar with market events
+   */
+  private getCalendar = () => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "getCalendar"
+        })
+        request.send().then(
+          (data) => {
+            //fulfilled
+            resolved(data)
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
 }

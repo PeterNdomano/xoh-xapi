@@ -9,4 +9,13 @@ let x = new XOH.Xapi({
 
 x.onReady(() => {
   console.log('Welcome');
+  x.getAllSymbols().then((data) => {
+    console.log('getting symbols....');
+    console.log(data);
+    
+  }, (error) => {
+    console.log(error.message);
+  });
+}, (error) => {
+  console.log(error.message);
 });
