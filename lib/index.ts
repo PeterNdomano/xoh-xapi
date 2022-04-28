@@ -1,5 +1,8 @@
 import { WebSocket } from 'ws';
-import { SYMBOL_RECORD } from './data-formats/SymbolRecord';
+import SYMBOL_RECORD from './data-formats/SymbolRecord';
+import CALENDAR_RECORD from './data-formats/CalendarRecord';
+import CHART_LAST_INFO_RECORD from './data-formats/ChartLastInfoRecord';
+import RATE_INFO_RECORD from './data-formats/RateInfoRecord';
 
 
 export interface ACCOUNT {
@@ -14,7 +17,6 @@ export interface REQUEST_BODY {
   arguments?: { }; //arguments for a particular request
   customTag?: number; //Returned exactly as it is by the server
 }
-
 
 
 export class SocketManager {
@@ -164,6 +166,50 @@ export class Xapi {
 
 
   /**
+   * Used to initiate connection to the server separately other than using onReady
+   */
+  private init = () => {
+    return (
+      new Promise(( resolved, rejected ) => {
+        if(this.loginStatus){
+          resolved(true);
+        }
+        else{
+          this.webSocket.onopen = () => {
+            this.login().then(
+              (data) => {
+                //login success
+                let response = JSON.parse(<string>data);
+                if(response.status === true){
+                  resolved(true);
+                }
+                else{
+                  rejected( new Error(response.errorCode+": "+response.errorDescr) );
+                }
+              },
+              (error) => {
+                //error in login process
+                rejected(error);
+              }
+            );
+          }
+
+          this.webSocket.onerror = (e) => {
+            this.loginStatus = false;
+            rejected(e.message);
+          }
+
+          this.webSocket.onclose = (e) => {
+            this.loginStatus = false;
+            rejected(new Error("Communication to the server was closed"));
+          }
+        }
+      })
+    );
+  }
+
+
+  /**
    * Used for login to the trading server
    */
   private login = () => {
@@ -222,7 +268,7 @@ export class Xapi {
   /**
    * Returns array of all symbols available for the user
    */
-  private getAllSymbols = () => {
+  private  getAllSymbols = () => {
     return (
       new Promise((resolved, rejected) => {
         let request = new Request(this.webSocket, {
@@ -230,8 +276,13 @@ export class Xapi {
         })
         request.send().then(
           (data) => {
-            //fulfilled
-            resolved(data)
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved(<Array<SYMBOL_RECORD>> response.returnData);
+            }
+            else{
+              rejected(new Error(response.errorCode+": "+response.errorDescr));
+            }
           },
           (error) => {
             //failed
@@ -253,8 +304,44 @@ export class Xapi {
         })
         request.send().then(
           (data) => {
-            //fulfilled
-            resolved(data)
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved(<Array<CALENDAR_RECORD>> response.returnData);
+            }
+            else{
+              rejected(new Error(response.errorCode+": "+response.errorDescr));
+            }
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
+  /**
+   * Returns chart info, from start date to the current time.
+   */
+  private getChartLastRequest = (info : CHART_LAST_INFO_RECORD) => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "getChartLastRequest",
+          arguments: {
+            info,
+          }
+        })
+        request.send().then(
+          (data) => {
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved(<Array<RATE_INFO_RECORD>> response.returnData.rateInfos); //skipped digits from response.returnData.digits
+            }
+            else{
+              rejected(new Error(response.errorCode+": "+response.errorDescr));
+            }
           },
           (error) => {
             //failed

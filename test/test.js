@@ -7,14 +7,19 @@ let x = new XOH.Xapi({
   broker: "xtb",
 });
 
+
 x.onReady(() => {
   console.log('Welcome');
-  x.getAllSymbols().then((data) => {
-    console.log('getting symbols....');
-    console.log(data);
-  }, (error) => {
-    console.log(error.message);
-  });
 }, (error) => {
   console.log(error.message);
 });
+
+console.log('second way.....');
+(
+  async () => {
+    await x.init();
+    let data = await x.getAllSymbols();
+    console.log(data[2]);
+  }
+)();
+console.log('second way end.....');
