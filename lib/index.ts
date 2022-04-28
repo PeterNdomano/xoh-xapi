@@ -4,6 +4,7 @@ import CALENDAR_RECORD from './data-formats/CalendarRecord';
 import CHART_LAST_INFO_RECORD from './data-formats/ChartLastInfoRecord';
 import RATE_INFO_RECORD from './data-formats/RateInfoRecord';
 import CHART_RANGE_INFO_RECORD from './data-formats/ChartRangeInfoRecord';
+import IB_RECORD from './data-formats/IbRecord';
 
 
 export interface ACCOUNT {
@@ -414,6 +415,59 @@ export class Xapi {
       new Promise((resolved, rejected) => {
         let request = new Request(this.webSocket, {
           command: "getCurrentUserData"
+        })
+        request.send().then(
+          (data) => {
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved( response.returnData );
+            }
+            else{
+              rejected(new Error(response.errorCode+": "+response.errorDescr));
+            }
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
+  private getIbsHistory = (end: number, start: number) => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "getIbsHistory",
+          arguments: {
+            end, start,
+          }
+        })
+        request.send().then(
+          (data) => {
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved(<Array<IB_RECORD>> response.returnData);
+            }
+            else{
+              rejected(new Error(response.errorCode+": "+response.errorDescr));
+            }
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
+  private getMarginLevel = () => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "getMarginLevel"
         })
         request.send().then(
           (data) => {
