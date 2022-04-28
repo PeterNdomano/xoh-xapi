@@ -12,7 +12,6 @@ x.onReady(() => {
   x.getAllSymbols().then((data) => {
     console.log('getting symbols....');
     console.log(data);
-    
   }, (error) => {
     console.log(error.message);
   });

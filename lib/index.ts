@@ -1,4 +1,5 @@
 import { WebSocket } from 'ws';
+import { SYMBOL_RECORD } from './data-formats/SymbolRecord';
 
 
 export interface ACCOUNT {
