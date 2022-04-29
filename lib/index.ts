@@ -5,6 +5,8 @@ import CHART_LAST_INFO_RECORD from './data-formats/ChartLastInfoRecord';
 import RATE_INFO_RECORD from './data-formats/RateInfoRecord';
 import CHART_RANGE_INFO_RECORD from './data-formats/ChartRangeInfoRecord';
 import IB_RECORD from './data-formats/IbRecord';
+import NEWS_TOPIC_RECORD from './data-formats/NewsTopicRecord';
+import STEP_RULE_RECORD from './data-formats/StepRuleRecord';
 
 
 export interface ACCOUNT {
@@ -382,14 +384,12 @@ export class Xapi {
     );
   }
 
-  private getCommissionDef = (symbol: string, volume: number) => {
+  private getCommissionDef = ( args : {symbol: string, volume: number}) => {
     return (
       new Promise((resolved, rejected) => {
         let request = new Request(this.webSocket, {
           command: "getCommissionDef",
-          arguments: {
-            symbol, volume,
-          }
+          arguments: args,
         })
         request.send().then(
           (data) => {
@@ -435,14 +435,12 @@ export class Xapi {
     );
   }
 
-  private getIbsHistory = (end: number, start: number) => {
+  private getIbsHistory = ( args: {end: number, start: number}) => {
     return (
       new Promise((resolved, rejected) => {
         let request = new Request(this.webSocket, {
           command: "getIbsHistory",
-          arguments: {
-            end, start,
-          }
+          arguments: args,
         })
         request.send().then(
           (data) => {
@@ -487,5 +485,160 @@ export class Xapi {
       })
     );
   }
+
+  private getMarginTrade = ( args: {symbol: string, volume: number}) => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "getMarginTrade",
+          arguments: args,
+        })
+        request.send().then(
+          (data) => {
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved(response.returnData);
+            }
+            else{
+              rejected(new Error(response.errorCode+": "+response.errorDescr));
+            }
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
+  private getNews = ( args: {end: number, start: number}) => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "getNews",
+          arguments: args,
+        })
+        request.send().then(
+          (data) => {
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved(<Array<NEWS_TOPIC_RECORD>> response.returnData);
+            }
+            else{
+              rejected(new Error(response.errorCode+": "+response.errorDescr));
+            }
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
+  private getProfitCalculation = ( args: { closePrice: number, cmd: number, openPrice: number, symbol: string, volume: number }) => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "getProfitCalculation",
+          arguments: args,
+        })
+        request.send().then(
+          (data) => {
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved(response.returnData);
+            }
+            else{
+              rejected(new Error(response.errorCode+": "+response.errorDescr));
+            }
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
+  private getServerTime = () => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "getServerTime"
+        })
+        request.send().then(
+          (data) => {
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved( response.returnData );
+            }
+            else{
+              rejected(new Error(response.errorCode+": "+response.errorDescr));
+            }
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
+  private getStepRules = () => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "getStepRules"
+        })
+        request.send().then(
+          (data) => {
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved(<Array<STEP_RULE_RECORD>> response.returnData);
+            }
+            else{
+              rejected(new Error(response.errorCode+": "+response.errorDescr));
+            }
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
+  private getSymbol = ( args : {symbol: string}) => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "getSymbol",
+          arguments: args,
+        })
+        request.send().then(
+          (data) => {
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved(<SYMBOL_RECORD> response.returnData );
+            }
+            else{
+              rejected(new Error(response.errorCode+": "+response.errorDescr));
+            }
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
 
 }
