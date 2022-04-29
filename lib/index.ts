@@ -11,6 +11,7 @@ import TICK_RECORD from './data-formats/TickRecord';
 import TRADE_RECORD from './data-formats/TradeRecord';
 import TRADING_HOURS_RECORD from './data-formats/TradingHoursRecord';
 import TRADE_TRANS_INFO from './data-formats/TradeTransInfo';
+import Streamer from './Streamer';
 
 export interface ACCOUNT {
   accountId: string; //trading account ID
@@ -78,6 +79,7 @@ export class Request {
   }
 }
 
+
 export class Xapi {
   private password: string;
   private accountId: string;
@@ -86,7 +88,10 @@ export class Xapi {
   private streamSessionId?: string;
   private loginStatus?: boolean;
   private host: string;
+  private hostStream: string;
   private webSocket: WebSocket;
+  private pingTimerId?: unknown;
+  private streamer?: Streamer;
 
   /**
    * Main Object for API communication
@@ -111,17 +116,21 @@ export class Xapi {
     if(this.broker === 'xoh'){
       if(this.type === 'demo'){
         this.host = "wss://ws.xapi.pro/demo";
+        this.hostStream = "wss://ws.xapi.pro/demoStream";
       }
       else{
         this.host = "wss://ws.xapi.pro/real";
+        this.hostStream = "wss://ws.xapi.pro/realStream";
       }
     }
     else{
       if(this.type === 'demo'){
         this.host = "wss://ws.xtb.com/demo";
+        this.hostStream = "wss://ws.xtb.com/demoStream";
       }
       else{
         this.host = "wss://ws.xtb.com/real";
+        this.hostStream = "wss://ws.xtb.com/realStream";
       }
     }
 
@@ -236,6 +245,15 @@ export class Xapi {
             if(response.status === true){
               this.streamSessionId = response.streamSessionId;
               this.loginStatus = true;
+              this.streamer = new Streamer({
+                streamSessionId: <string>this.streamSessionId,
+                host: this.hostStream,
+              });
+
+              //ping after every five minutes to keep connection alive
+              this.pingTimerId =  setInterval( async () => {
+                await this.ping(); //can be set to stream version of ping
+              }, 300000);
             }
             resolved(data)
           },
@@ -261,6 +279,11 @@ export class Xapi {
         request.send().then(
           (data) => {
             //fulfilled
+            //clear the ping timer if set
+            if(!(this.pingTimerId === undefined)){
+              clearInterval(<number>this.pingTimerId);
+            }
+
             resolved(data)
           },
           (error) => {
