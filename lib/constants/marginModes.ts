@@ -1,3 +1,3 @@
-export const M_FOREX = 101;
-export const M_CFD_LEVERAGED = 102;
-export const M_CFD = 103;
+export const MARGIN_FOREX = 101;
+export const MARGIN_CFD_LEVERAGED = 102;
+export const MARGIN_CFD = 103;

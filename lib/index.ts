@@ -10,6 +10,7 @@ import STEP_RULE_RECORD from './data-formats/StepRuleRecord';
 import TICK_RECORD from './data-formats/TickRecord';
 import TRADE_RECORD from './data-formats/TradeRecord';
 import TRADING_HOURS_RECORD from './data-formats/TradingHoursRecord';
+import TRADE_TRANS_INFO from './data-formats/TradeTransInfo';
 
 export interface ACCOUNT {
   accountId: string; //trading account ID
@@ -786,6 +787,85 @@ export class Xapi {
             let response = JSON.parse(<string>data);
             if(response.status === true){
               resolved( response.returnData );
+            }
+            else{
+              rejected(new Error(response.errorCode+": "+response.errorDescr));
+            }
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
+  private ping = () => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "ping"
+        })
+        request.send().then(
+          (data) => {
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved( true );
+            }
+            else{
+              rejected( new Error(response.errorCode+": "+response.errorDescr) );
+            }
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
+  private tradeTransaction = (info : TRADE_TRANS_INFO) => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "tradeTransaction",
+          arguments: {
+            tradeTransInfo: info,
+          }
+        })
+        request.send().then(
+          (data) => {
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved(response.returnData); //orderId
+            }
+            else{
+              rejected(new Error(response.errorCode+": "+response.errorDescr));
+            }
+          },
+          (error) => {
+            //failed
+            rejected(error);
+          }
+        )
+      })
+    );
+  }
+
+  private tradeTransactionStatus = ( args: { order: number}) => {
+    return (
+      new Promise((resolved, rejected) => {
+        let request = new Request(this.webSocket, {
+          command: "tradeTransactionStatus",
+          arguments: args,
+        })
+        request.send().then(
+          (data) => {
+            let response = JSON.parse(<string>data);
+            if(response.status === true){
+              resolved(response.returnData);
             }
             else{
               rejected(new Error(response.errorCode+": "+response.errorDescr));

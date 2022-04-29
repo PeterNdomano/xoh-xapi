@@ -1,2 +1,2 @@
-export const LEVEL_ALL = -1;
-export const LEVEL_BASE = 0;
+export const PRICE_LEVEL_ALL = -1;
+export const PRICE_LEVEL_BASE = 0;
