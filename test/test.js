@@ -7,19 +7,39 @@ let x = new XOH.Xapi({
   broker: "xtb",
 });
 
-
 x.onReady(() => {
-  console.log('Welcome');
+  console.log("welcome....");
+  x.streamer.getKeepAlive({
+    listener: (data) => {
+      console.log('it works....');
+      console.log(data);
+    }
+  })
 }, (error) => {
-  console.log(error.message);
-});
+  console.log("error: "+error.message);
+})
 
-console.log('second way.....');
+/*
 (
   async () => {
     await x.init();
-    let data = await x.getAllSymbols();
-    console.log(data[2]);
+    await x.getAllSymbols().then((symbols) => {
+      console.log('symbols data');
+      console.log(symbols[0]);
+    })
+
+    await x.getCalendar().then((cal) => {
+      console.log('calendar data');
+      console.log(cal[0]);
+    })
+
+    x.streamer.getKeepAlive({
+      listener: (data) => {
+        console.log('it works....');
+        console.log(data);
+      }
+    })
   }
+
 )();
-console.log('second way end.....');
+*/

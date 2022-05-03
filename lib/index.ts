@@ -12,6 +12,7 @@ import TRADE_RECORD from './data-formats/TradeRecord';
 import TRADING_HOURS_RECORD from './data-formats/TradingHoursRecord';
 import TRADE_TRANS_INFO from './data-formats/TradeTransInfo';
 import Streamer from './Streamer';
+import { createCustomTag } from './helpers';
 
 export interface ACCOUNT {
   accountId: string; //trading account ID
@@ -23,18 +24,22 @@ export interface ACCOUNT {
 export interface REQUEST_BODY {
   command: string; //command to be executed on the server
   arguments?: { }; //arguments for a particular request
-  customTag?: number; //Returned exactly as it is by the server
+  customTag?: string; //Returned exactly as it is by the server
 }
 
 
 export class SocketManager {
-  static send = ( webSocket: WebSocket, body: string ) => {
+  static send = ( webSocket: WebSocket, body: string, customTag: string ) => {
     return (
       new Promise((resolve, reject) => {
         webSocket.send(body);
 
         webSocket.onmessage = (e) => {
-          resolve(e.data);
+
+          let response = JSON.parse(<string>e.data);
+          if(response.customTag === customTag){
+            resolve(e.data);
+          }
         }
       })
     );
@@ -44,11 +49,15 @@ export class SocketManager {
 export class Request {
   protected webSocket: WebSocket;
   protected body: REQUEST_BODY;
+  protected customTag: string;
 
 
   constructor(webSocket: WebSocket, body: REQUEST_BODY ) {
     this.body = body;
     this.webSocket = webSocket;
+    this.customTag = createCustomTag();
+    //add custom tag
+    this.body.customTag = this.customTag;
   }
 
   isValid(){
@@ -64,7 +73,7 @@ export class Request {
         if(this.isValid()){
           try{
             let body = JSON.stringify(this.body);
-            let response = await SocketManager.send(this.webSocket, body);
+            let response = await SocketManager.send(this.webSocket, body, this.customTag);
             resolve(response);
           }
           catch(e){
@@ -250,10 +259,10 @@ export class Xapi {
                 host: this.hostStream,
               });
 
-              //ping after every five minutes to keep connection alive
+              //ping after every 30 secs to keep connection alive
               this.pingTimerId =  setInterval( async () => {
                 await this.ping(); //can be set to stream version of ping
-              }, 300000);
+              }, 10000);
             }
             resolved(data)
           },
