@@ -117,6 +117,30 @@ export default class Streamer {
     } );
   }
 
+  public keepAlive = () => {
+    let requestData = {
+      command: "getKeepAlive",
+      streamSessionId: this.streamSessionId,
+    };
+    this.socket.send(JSON.stringify(requestData));
+
+  }
+
+  public registerRequest = (request: STREAM_REQUEST) => {
+    this.requests.push(request);
+  }
+
+  public deleteRequest = (request: STREAM_REQUEST) => {
+    //delete request here
+    let command = request.command;
+    let symbol = request.symbol;
+    this.requests.forEach( (item, index) => {
+      if(item.command === command && item.symbol === symbol){
+        this.requests.splice(index, 1);
+      }
+    } );
+  }
+
   public ping = () => {
     let requestData = {
       command: "ping",
@@ -265,27 +289,61 @@ export default class Streamer {
 
   }
 
-  public keepAlive = () => {
+  public stopBalance = () => {
     let requestData = {
-      command: "getKeepAlive",
-      streamSessionId: this.streamSessionId,
+      command: "stopBalance",
     };
     this.socket.send(JSON.stringify(requestData));
-
   }
 
-  public registerRequest = (request: STREAM_REQUEST) => {
-    this.requests.push(request);
+  public stopCandles = ( args: { symbol: string } ) => {
+    let requestData = {
+      command: "stopCandles",
+      symbol: args.symbol,
+    };
+    this.socket.send(JSON.stringify(requestData));
   }
 
-  public deleteRequest = (request: STREAM_REQUEST) => {
-    //delete request here
-    let command = request.command;
-    let symbol = request.symbol;
-    this.requests.forEach( (item, index) => {
-      if(item.command === command && item.symbol === symbol){
-        this.requests.splice(index, 1);
-      }
-    } );
+  public stopTickPrices = ( args: { symbol: string } ) => {
+    let requestData = {
+      command: "stopTickPrices",
+      symbol: args.symbol,
+    };
+    this.socket.send(JSON.stringify(requestData));
+  }
+
+  public stopKeepAlive = () => {
+    let requestData = {
+      command: "stopKeepAlive",
+    };
+    this.socket.send(JSON.stringify(requestData));
+  }
+
+  public stopNews = () => {
+    let requestData = {
+      command: "stopNews",
+    };
+    this.socket.send(JSON.stringify(requestData));
+  }
+
+  public stopTrades = () => {
+    let requestData = {
+      command: "stopTrades",
+    };
+    this.socket.send(JSON.stringify(requestData));
+  }
+
+  public stopTradeStatus = () => {
+    let requestData = {
+      command: "stopTradeStatus",
+    };
+    this.socket.send(JSON.stringify(requestData));
+  }
+
+  public stopProfits = () => {
+    let requestData = {
+      command: "stopProfits",
+    };
+    this.socket.send(JSON.stringify(requestData));
   }
 }
