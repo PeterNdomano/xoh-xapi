@@ -257,6 +257,8 @@ export class Xapi {
               this.streamer = new Streamer({
                 streamSessionId: <string>this.streamSessionId,
                 host: this.hostStream,
+                candlesTrigger: this.getChartLastRequest,
+                candlesTrigger2: this.getChartRangeRequest,
               });
 
               //ping after every 30 secs to keep connection alive

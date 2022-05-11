@@ -7,13 +7,16 @@ let x = new XOH.Xapi({
   broker: "xtb",
 });
 
-x.onReady(() => {
+x.onReady(async () => {
   console.log("welcome....");
-  x.streamer.getKeepAlive({
+  await x.streamer.init(); //remember to iit streamer before using it
+  x.streamer.getCandles({
     listener: (data) => {
-      console.log('it works....');
-      console.log(data);
-    }
+      console.log('it works.... data is:'+data);
+      //console.log(data);
+    },
+    symbol: "EURUSD",
+    period: 5,
   })
 }, (error) => {
   console.log("error: "+error.message);

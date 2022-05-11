@@ -1,5 +1,6 @@
 import { WebSocket } from 'ws';
 import { createCustomTag } from './helpers';
+import { PERIOD_M15, PERIOD_M1 } from './constants/periods';
 
 export interface STREAM_REQUEST {
   symbol?: string;
@@ -14,10 +15,14 @@ export default class Streamer {
   public requests: Array<STREAM_REQUEST>;
   public socketOpen?: boolean;
   public pingTimerId?: unknown;
+  public candlesTrigger: Function;
+  public candlesTrigger2: Function;
 
-  constructor(args : { streamSessionId: string, host: string }){
+  constructor(args : { streamSessionId: string, host: string, candlesTrigger: Function, candlesTrigger2: Function }){
     this.streamSessionId = args.streamSessionId;
     this.host = args.host;
+    this.candlesTrigger = args.candlesTrigger;
+    this.candlesTrigger2 = args.candlesTrigger2;
     this.socketOpen = false;
     this.socket = new WebSocket(this.host);
     this.requests = [];
@@ -98,6 +103,62 @@ export default class Streamer {
 
   }
 
+  public getNews = ( args: { listener: (data: string) => void } ) => {
+    this.registerRequest({
+      command: "news",
+      listener: args.listener,
+    });
+
+    let requestData = {
+      command: "getNews",
+      streamSessionId: this.streamSessionId,
+    };
+    this.socket.send(JSON.stringify(requestData));
+
+  }
+
+  public getProfits = ( args: { listener: (data: string) => void } ) => {
+    this.registerRequest({
+      command: "profit",
+      listener: args.listener,
+    });
+
+    let requestData = {
+      command: "getProfits",
+      streamSessionId: this.streamSessionId,
+    };
+    this.socket.send(JSON.stringify(requestData));
+
+  }
+
+  public getTrades = ( args: { listener: (data: string) => void } ) => {
+    this.registerRequest({
+      command: "trade",
+      listener: args.listener,
+    });
+
+    let requestData = {
+      command: "getTrades",
+      streamSessionId: this.streamSessionId,
+    };
+    this.socket.send(JSON.stringify(requestData));
+
+  }
+
+  public getTradeStatus = ( args: { listener: (data: string) => void } ) => {
+    this.registerRequest({
+      command: "tradeStatus",
+      listener: args.listener,
+    });
+
+    let requestData = {
+      command: "getTradeStatus",
+      streamSessionId: this.streamSessionId,
+    };
+    this.socket.send(JSON.stringify(requestData));
+
+  }
+
   public getKeepAlive = ( args: { listener: (data: string) => void } ) => {
     this.registerRequest({
       command: "keepAlive",
@@ -112,10 +173,11 @@ export default class Streamer {
 
   }
 
-  public getCandles = ( args: { listener: (data: string) => void, symbol: string } ) => {
+  public getCandles = ( args: { listener: (data: string) => void, symbol: string, period?: number } ) => {
     this.registerRequest({
-      command: "getCandles",
+      command: "candle",
       listener: args.listener,
+      symbol: args.symbol,
     });
 
     let requestData = {
@@ -123,6 +185,43 @@ export default class Streamer {
       streamSessionId: this.streamSessionId,
       symbol: args.symbol,
     };
+
+    (
+      async () => {
+        /*
+        let triggerData = await this.candlesTrigger({
+          symbol: args.symbol,
+          start: ((new Date().getTime()) - (1000 * (60 * 60))),
+          period: PERIOD_M15,
+        });
+        */
+        let triggerData = await this.candlesTrigger2({
+          symbol: args.symbol,
+          start: ((new Date().getTime()) - (1000 * (60 * 60))),
+          end: (new Date().getTime()),
+          period: ((args.period === undefined) ? PERIOD_M1 : args.period),
+        });
+        this.socket.send(JSON.stringify(requestData));
+      }
+    )();
+
+  }
+
+  public getTickPrices = ( args: { listener: (data: string) => void, symbol: string, minArrivalTime?: number, maxLevel?: number, } ) => {
+    this.registerRequest({
+      command: "tickPrices",
+      listener: args.listener,
+      symbol: args.symbol,
+    });
+
+    let requestData = {
+      command: "getTickPrices",
+      streamSessionId: this.streamSessionId,
+      symbol: args.symbol,
+      minArrivalTime: ((args.minArrivalTime === undefined) ? 0 : args.minArrivalTime),
+      maxLevel: ((args.maxLevel === undefined) ? 2 : args.maxLevel),
+    };
+
     this.socket.send(JSON.stringify(requestData));
 
   }
@@ -134,15 +233,6 @@ export default class Streamer {
     };
     this.socket.send(JSON.stringify(requestData));
 
-  }
-
-  public test = (cmd: string) => {
-    let requestData = {
-      command: cmd,
-      streamSessionId: this.streamSessionId,
-      symbol: "EURJPY"
-    };
-    this.socket.send(JSON.stringify(requestData));
   }
 
   public registerRequest = (request: STREAM_REQUEST) => {
