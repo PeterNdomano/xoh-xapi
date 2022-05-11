@@ -1,10 +1,18 @@
 import { WebSocket } from 'ws';
 import { createCustomTag } from './helpers';
 import { PERIOD_M15, PERIOD_M1 } from './constants/periods';
+import STREAMING_BALANCE_RECORD from './data-formats/StreamingBalanceRecord';
+import STREAMING_CANDLE_RECORD from './data-formats/StreamingCandleRecord';
+import STREAMING_KEEP_ALIVE_RECORD from './data-formats/StreamingKeepAliveRecord';
+import STREAMING_NEWS_RECORD from './data-formats/StreamingNewsRecord';
+import STREAMING_PROFIT_RECORD from './data-formats/StreamingProfitRecord';
+import STREAMING_TICK_RECORD from './data-formats/StreamingTickRecord';
+import STREAMING_TRADE_RECORD from './data-formats/StreamingTradeRecord';
+import STREAMING_TRADE_STATUS_RECORD from './data-formats/StreamingTradeStatusRecord';
 
 export interface STREAM_REQUEST {
   symbol?: string;
-  listener: (data: string) => void;
+  listener: (data: unknown) => void;
   command: string;
 }
 
@@ -77,6 +85,34 @@ export default class Streamer {
     this.requests.forEach( (item, index) => {
       if(item.command === command && item.symbol === symbol){
         item.listener(data);
+        if( command === "balance"){
+          item.listener(<STREAMING_BALANCE_RECORD> response.data);
+        }
+        else if( command === "candle"){
+          item.listener(<STREAMING_CANDLE_RECORD> response.data);
+        }
+        else if( command === "keepAlive"){
+          item.listener(<STREAMING_KEEP_ALIVE_RECORD> response.data);
+        }
+        else if( command === "news"){
+          item.listener(<STREAMING_NEWS_RECORD> response.data);
+        }
+        else if( command === "profit"){
+          item.listener(<STREAMING_PROFIT_RECORD> response.data);
+        }
+        else if( command === "tickPrices"){
+          item.listener(<STREAMING_TICK_RECORD> response.data);
+        }
+        else if( command === "trade"){
+          item.listener(<STREAMING_TRADE_RECORD> response.data);
+        }
+        else if( command === "tradeStatus"){
+          item.listener(<STREAMING_TRADE_STATUS_RECORD> response.data);
+        }
+        else{
+          //just to be safe, reply with unformated data
+          item.listener(data);
+        }
       }
     } );
   }
@@ -203,7 +239,7 @@ export default class Streamer {
           end: (new Date().getTime()),
           period: ((args.period === undefined) ? PERIOD_M1 : args.period),
         });
-        
+
         this.socket.send(JSON.stringify(requestData));
       }
     )();

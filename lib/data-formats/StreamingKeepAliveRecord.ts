@@ -1,3 +1,3 @@
-export default interface STREAM_KEEP_ALIVE_RECORD {
+export default interface STREAMING_KEEP_ALIVE_RECORD {
   timestamp?: number; //timestamp
 }
