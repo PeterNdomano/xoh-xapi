@@ -12,11 +12,54 @@ x.onReady(async () => {
   await x.streamer.init(); //remember to iit streamer before using it
   x.streamer.getCandles({
     listener: (data) => {
-      console.log('it works.... data is:'+data);
+      console.log('getCandles works.... data is:'+data);
       //console.log(data);
     },
     symbol: "EURUSD",
     period: 5,
+  })
+  x.streamer.getBalance({
+    listener: (data) => {
+      console.log('getBalance works.... data is:'+data);
+      //console.log(data);
+    }
+  })
+  x.streamer.getKeepAlive({
+    listener: (data) => {
+      console.log('getKeepAlive works.... data is:'+data);
+      //console.log(data);
+    }
+  })
+  x.streamer.getNews({
+    listener: (data) => {
+      console.log('getNews works.... data is:'+data);
+      //console.log(data);
+    }
+  })
+  x.streamer.getProfits({
+    listener: (data) => {
+      console.log('getProfits works.... data is:'+data);
+      //console.log(data);
+    }
+  })
+  x.streamer.getTickPrices({
+    listener: (data) => {
+      console.log('getTickPrices works.... data is:'+data);
+      //console.log(data);
+    },
+    symbol: "EURUSD",
+  })
+  x.streamer.getTrades({
+    listener: (data) => {
+      console.log('getTrades works.... data is:'+data);
+      //console.log(data);
+    }
+  })
+  x.streamer.getTradeStatus({
+    listener: (data) => {
+      console.log('getTradeStatus works.... data is:'+data);
+      //console.log(data);
+    }
   })
 }, (error) => {
   console.log("error: "+error.message);
