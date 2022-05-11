@@ -11,6 +11,13 @@ import TICK_RECORD from './data-formats/TickRecord';
 import TRADE_RECORD from './data-formats/TradeRecord';
 import TRADING_HOURS_RECORD from './data-formats/TradingHoursRecord';
 import TRADE_TRANS_INFO from './data-formats/TradeTransInfo';
+import COMMISSION_DEF from './data-formats/CommissionDef';
+import CURRENT_USER_DATA from './data-formats/CurrentUserData';
+import MARGIN_LEVEL from './data-formats/MarginLevel';
+import MARGIN_TRADE from './data-formats/MarginTrade';
+import PROFIT from './data-formats/Profit';
+import SERVER_TIME from './data-formats/ServerTime';
+import VERSION from './data-formats/Version';
 import Streamer from './Streamer';
 import { createCustomTag } from './helpers';
 
@@ -265,8 +272,12 @@ export class Xapi {
               this.pingTimerId =  setInterval( async () => {
                 await this.ping(); //can be set to stream version of ping
               }, 10000);
+              resolved(true)
             }
-            resolved(data)
+            else{
+              rejected( new Error("Cannot Login to the server") );
+            }
+
           },
           (error) => {
             //failed
@@ -295,7 +306,7 @@ export class Xapi {
               clearInterval(<number>this.pingTimerId);
             }
 
-            resolved(data)
+            resolved(true)
           },
           (error) => {
             //failed
@@ -432,7 +443,7 @@ export class Xapi {
           (data) => {
             let response = JSON.parse(<string>data);
             if(response.status === true){
-              resolved( response.returnData );
+              resolved( <COMMISSION_DEF>response.returnData );
             }
             else{
               rejected(new Error(response.errorCode+": "+response.errorDescr));
@@ -457,7 +468,7 @@ export class Xapi {
           (data) => {
             let response = JSON.parse(<string>data);
             if(response.status === true){
-              resolved( response.returnData );
+              resolved( <CURRENT_USER_DATA>response.returnData );
             }
             else{
               rejected(new Error(response.errorCode+": "+response.errorDescr));
@@ -508,7 +519,7 @@ export class Xapi {
           (data) => {
             let response = JSON.parse(<string>data);
             if(response.status === true){
-              resolved( response.returnData );
+              resolved( <MARGIN_LEVEL>response.returnData );
             }
             else{
               rejected(new Error(response.errorCode+": "+response.errorDescr));
@@ -534,7 +545,7 @@ export class Xapi {
           (data) => {
             let response = JSON.parse(<string>data);
             if(response.status === true){
-              resolved(response.returnData);
+              resolved( <MARGIN_TRADE>response.returnData);
             }
             else{
               rejected(new Error(response.errorCode+": "+response.errorDescr));
@@ -587,7 +598,7 @@ export class Xapi {
           (data) => {
             let response = JSON.parse(<string>data);
             if(response.status === true){
-              resolved(response.returnData);
+              resolved( <PROFIT>response.returnData);
             }
             else{
               rejected(new Error(response.errorCode+": "+response.errorDescr));
@@ -612,7 +623,7 @@ export class Xapi {
           (data) => {
             let response = JSON.parse(<string>data);
             if(response.status === true){
-              resolved( response.returnData );
+              resolved( <SERVER_TIME>response.returnData );
             }
             else{
               rejected(new Error(response.errorCode+": "+response.errorDescr));
@@ -820,7 +831,7 @@ export class Xapi {
           (data) => {
             let response = JSON.parse(<string>data);
             if(response.status === true){
-              resolved( response.returnData );
+              resolved( <VERSION>response.returnData );
             }
             else{
               rejected(new Error(response.errorCode+": "+response.errorDescr));
