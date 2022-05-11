@@ -188,19 +188,22 @@ export default class Streamer {
 
     (
       async () => {
-        /*
+
+        //runs the first trigger
         let triggerData = await this.candlesTrigger({
           symbol: args.symbol,
           start: ((new Date().getTime()) - (1000 * (60 * 60))),
-          period: PERIOD_M15,
+          period: ((args.period === undefined) ? PERIOD_M1 : args.period),
         });
-        */
-        let triggerData = await this.candlesTrigger2({
+
+        //runs the second trigger
+        let triggerData2 = await this.candlesTrigger2({
           symbol: args.symbol,
           start: ((new Date().getTime()) - (1000 * (60 * 60))),
           end: (new Date().getTime()),
           period: ((args.period === undefined) ? PERIOD_M1 : args.period),
         });
+        
         this.socket.send(JSON.stringify(requestData));
       }
     )();
