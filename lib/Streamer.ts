@@ -125,7 +125,7 @@ export default class Streamer {
     this.socket.send(JSON.stringify(requestData));
   }
 
-  public getBalance = ( args: { listener: (data: string) => void } ) => {
+  public getBalance = ( args: { listener: (data: unknown) => void } ) => {
     this.registerRequest({
       command: "balance",
       listener: args.listener,
@@ -139,7 +139,7 @@ export default class Streamer {
 
   }
 
-  public getNews = ( args: { listener: (data: string) => void } ) => {
+  public getNews = ( args: { listener: (data: unknown) => void } ) => {
     this.registerRequest({
       command: "news",
       listener: args.listener,
@@ -153,7 +153,7 @@ export default class Streamer {
 
   }
 
-  public getProfits = ( args: { listener: (data: string) => void } ) => {
+  public getProfits = ( args: { listener: (data: unknown) => void } ) => {
     this.registerRequest({
       command: "profit",
       listener: args.listener,
@@ -167,7 +167,7 @@ export default class Streamer {
 
   }
 
-  public getTrades = ( args: { listener: (data: string) => void } ) => {
+  public getTrades = ( args: { listener: (data: unknown) => void } ) => {
     this.registerRequest({
       command: "trade",
       listener: args.listener,
@@ -181,7 +181,7 @@ export default class Streamer {
 
   }
 
-  public getTradeStatus = ( args: { listener: (data: string) => void } ) => {
+  public getTradeStatus = ( args: { listener: (data: unknown) => void } ) => {
     this.registerRequest({
       command: "tradeStatus",
       listener: args.listener,
@@ -195,7 +195,7 @@ export default class Streamer {
 
   }
 
-  public getKeepAlive = ( args: { listener: (data: string) => void } ) => {
+  public getKeepAlive = ( args: { listener: (data: unknown) => void } ) => {
     this.registerRequest({
       command: "keepAlive",
       listener: args.listener,
@@ -209,7 +209,7 @@ export default class Streamer {
 
   }
 
-  public getCandles = ( args: { listener: (data: string) => void, symbol: string, period?: number } ) => {
+  public getCandles = ( args: { listener: (data: unknown) => void, symbol: string, period?: number } ) => {
     this.registerRequest({
       command: "candle",
       listener: args.listener,
@@ -246,7 +246,7 @@ export default class Streamer {
 
   }
 
-  public getTickPrices = ( args: { listener: (data: string) => void, symbol: string, minArrivalTime?: number, maxLevel?: number, } ) => {
+  public getTickPrices = ( args: { listener: (data: unknown) => void, symbol: string, minArrivalTime?: number, maxLevel?: number, } ) => {
     this.registerRequest({
       command: "tickPrices",
       listener: args.listener,
