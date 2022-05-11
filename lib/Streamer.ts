@@ -1,5 +1,4 @@
 import { WebSocket } from 'ws';
-import { createCustomTag } from './helpers';
 import { PERIOD_M15, PERIOD_M1 } from './constants/periods';
 import STREAMING_BALANCE_RECORD from './data-formats/StreamingBalanceRecord';
 import STREAMING_CANDLE_RECORD from './data-formats/StreamingCandleRecord';

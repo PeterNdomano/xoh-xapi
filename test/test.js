@@ -1,35 +1,22 @@
-const XOH = require('../dist/index.js');
+const Xapi = require('../dist/index.js').default;
 
-let x = new XOH.Xapi({
+let x = new Xapi({
   accountId: "13356926",
   password: "DemoTest123",
   type: "demo",
   broker: "xtb",
 });
 
+
 x.onReady(async () => {
   console.log("welcome....");
-  await x.streamer.init(); //remember to iit streamer before using it
-  
-  x.streamer.getNews({
-    listener: (data) => {
-      console.log('getNews works.... data is:'+data);
-      //console.log(data);
-    }
-  })
-
-  x.streamer.getTrades({
-    listener: (data) => {
-      console.log('getTrades works.... data is:'+data);
-      //console.log(data);
-    }
-  })
+  await x.streamer.init(); //remember to init streamer before using it
 
 }, (error) => {
   console.log("error: "+error.message);
 })
 
-/*
+/* OR
 (
   async () => {
     await x.init();
