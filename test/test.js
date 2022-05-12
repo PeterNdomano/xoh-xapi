@@ -1,8 +1,8 @@
 const Xapi = require('../dist/index.js').default;
 
 let x = new Xapi({
-  accountId: "13356926",
-  password: "DemoTest123",
+  accountId: "",
+  password: "",
   type: "demo",
   broker: "xtb",
 });
