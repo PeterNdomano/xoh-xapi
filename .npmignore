@@ -1,2 +1,5 @@
 lib/
-dist/test.js
+test/
+tsconfig.json
+old-tsconfig.json
+README.md

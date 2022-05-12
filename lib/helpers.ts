@@ -1,4 +1,4 @@
-import { WebSocket } from 'ws';
+import WebSocketNoBrowser from 'ws';
 
 export function createCustomTag(){
   let tag = new Date().getMilliseconds();
@@ -21,12 +21,12 @@ export interface REQUEST_BODY {
 
 
 export class SocketManager {
-  static send = ( webSocket: WebSocket, body: string, customTag: string ) => {
+  static send = ( webSocket: WebSocket | WebSocketNoBrowser, body: string, customTag: string ) => {
     return (
       new Promise((resolve, reject) => {
         webSocket.send(body);
 
-        webSocket.onmessage = (e) => {
+        webSocket.onmessage = (e: { data: unknown }) => {
 
           let response = JSON.parse(<string>e.data);
           if(response.customTag === customTag){
@@ -39,12 +39,12 @@ export class SocketManager {
 }
 
 export class Request {
-  protected webSocket: WebSocket;
+  protected webSocket: WebSocket | WebSocketNoBrowser;
   protected body: REQUEST_BODY;
   protected customTag: string;
 
 
-  constructor(webSocket: WebSocket, body: REQUEST_BODY ) {
+  constructor(webSocket: WebSocket | WebSocketNoBrowser, body: REQUEST_BODY ) {
     this.body = body;
     this.webSocket = webSocket;
     this.customTag = createCustomTag();

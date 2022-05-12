@@ -1,4 +1,5 @@
-import { WebSocket } from 'ws';
+import WebSocketNoBrowser from 'ws';
+
 import SYMBOL_RECORD from './data-formats/SymbolRecord';
 import CALENDAR_RECORD from './data-formats/CalendarRecord';
 import CHART_LAST_INFO_RECORD from './data-formats/ChartLastInfoRecord';
@@ -32,7 +33,7 @@ export default class Xapi {
   private loginStatus?: boolean;
   private host: string;
   private hostStream: string;
-  private webSocket: WebSocket;
+  private webSocket: WebSocket | WebSocketNoBrowser;
   private pingTimerId?: unknown;
   private streamer?: Streamer;
 
@@ -78,7 +79,15 @@ export default class Xapi {
     }
 
     //set websocket
-    this.webSocket = new WebSocket(this.host);
+    if(
+      typeof process === 'object' &&
+      typeof process.versions === 'object' &&
+      typeof process.versions.node !== 'undefined'){
+        this.webSocket = new WebSocketNoBrowser(this.host);
+    }
+    else{
+      this.webSocket = new WebSocket(this.host);
+    }
   }
 
 
@@ -111,12 +120,12 @@ export default class Xapi {
         );
       }
 
-      this.webSocket.onerror = (e) => {
+      this.webSocket.onerror = (e: unknown) => {
         this.loginStatus = false;
-        onError(e.message);
+        onError("Websocket error");
       }
 
-      this.webSocket.onclose = (e) => {
+      this.webSocket.onclose = (e: unknown) => {
         this.loginStatus = false;
         onError(new Error("Communication to the server was closed"));
       }
@@ -153,12 +162,12 @@ export default class Xapi {
             );
           }
 
-          this.webSocket.onerror = (e) => {
+          this.webSocket.onerror = (e: unknown) => {
             this.loginStatus = false;
-            rejected(e.message);
+            rejected("Websocket Error");
           }
 
-          this.webSocket.onclose = (e) => {
+          this.webSocket.onclose = (e: unknown) => {
             this.loginStatus = false;
             rejected(new Error("Communication to the server was closed"));
           }

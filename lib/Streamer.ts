@@ -1,4 +1,5 @@
-import { WebSocket } from 'ws';
+import WebSocketNoBrowser from 'ws';
+
 import { PERIOD_M15, PERIOD_M1 } from './constants/periods';
 import STREAMING_BALANCE_RECORD from './data-formats/StreamingBalanceRecord';
 import STREAMING_CANDLE_RECORD from './data-formats/StreamingCandleRecord';
@@ -18,7 +19,7 @@ export interface STREAM_REQUEST {
 export default class Streamer {
   public streamSessionId: string;
   public host: string;
-  public socket: WebSocket;
+  public socket: WebSocket | WebSocketNoBrowser;
   public requests: Array<STREAM_REQUEST>;
   public socketOpen?: boolean;
   public pingTimerId?: unknown;
@@ -31,7 +32,16 @@ export default class Streamer {
     this.candlesTrigger = args.candlesTrigger;
     this.candlesTrigger2 = args.candlesTrigger2;
     this.socketOpen = false;
-    this.socket = new WebSocket(this.host);
+
+    if(
+      typeof process === 'object' &&
+      typeof process.versions === 'object' &&
+      typeof process.versions.node !== 'undefined'){
+        this.socket = new WebSocketNoBrowser(this.host);
+    }
+    else{
+      this.socket = new WebSocket(this.host);
+    }
     this.requests = [];
 
     (
@@ -55,16 +65,16 @@ export default class Streamer {
            resolved(true);
          }
 
-         this.socket.onmessage = (e) => {
+         this.socket.onmessage = (e: { data: unknown}) => {
            this.processDataStream(<string>e.data);
          }
 
-         this.socket.onerror = (error) => {
+         this.socket.onerror = (error: unknown) => {
            this.socketOpen = false;
-           rejected(error);
+           rejected("WebSocket error");
          }
 
-         this.socket.onclose = (e) => {
+         this.socket.onclose = (e: unknown) => {
            this.socketOpen = false;
            rejected(new Error("Streaming connection closed"));
          }

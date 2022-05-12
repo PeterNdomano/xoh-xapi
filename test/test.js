@@ -11,6 +11,17 @@ let x = new Xapi({
 x.onReady(async () => {
   console.log("welcome....");
   await x.streamer.init(); //remember to init streamer before using it
+  await x.getCalendar().then((cal) => {
+    console.log('calendar data');
+    console.log(cal[0]);
+  })
+
+  x.streamer.getKeepAlive({
+    listener: (data) => {
+      console.log('it works....');
+      console.log(data);
+    }
+  })
 
 }, (error) => {
   console.log("error: "+error.message);
