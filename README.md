@@ -23,7 +23,7 @@ Then Import it in your Project by running  `import Xapi from 'xoh-xapi'`
 
 ### How to use
 First you must create an instance of Xapi by:
-```
+```js
 let x = new Xapi({
     accountId: "<your_account_id>", //you can get a demo account ID from XTB
     password: "<your_password>", //Your account password
