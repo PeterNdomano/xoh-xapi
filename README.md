@@ -38,7 +38,7 @@ You can initialize it in two ways. Either by using `x.init()` or by using `x.onR
 
 #### Initializing with Xapi.init()
 Note `x` is our `Xapi` instance here and this API is Promise Based. So you initialize it like below..
-```
+```js
 (
   async () => {
     await x.init();
@@ -55,7 +55,7 @@ Note `x` is our `Xapi` instance here and this API is Promise Based. So you initi
 #### Initializing with Xapi.onReady( success(), fail(<Error> error))
 This is the most recomended way to initialize this API because it gives you more control on how to handle Startup errors.
 Note `x` is our `Xapi` instance here. So you initialize it like below..
-```
+```js
 x.onReady(async () => {
   console.log("welcome....");
   await x.getCalendar().then((cal) => {
@@ -73,7 +73,7 @@ After initialization you can perform all actions using the api as [described her
 #### STreaming commands (Get Real time data as it arrive on the server)
 In order to do this you must first initialize the streamer of Xapi instance by `Xapi.streamer.init()` as follows.
 Note: the initialization method is a Promise-based function
-```
+```js
 x.onReady(async () => {
   console.log("welcome....");
   await x.streamer.init(); //streamer initialized here.
@@ -98,7 +98,7 @@ Other object fields may be for symbols and other function specific parameters.
 ### Format of Response Data:
 This API replies with Purely Javascript Objects, so there's no need to Parse, you may only Stringfy the response data if you want to have them as JSON instead. Consider the example below.
 
-```
+```js
 x.onReady(async () => {
   console.log("welcome....");
   await x.streamer.init(); //remember to init streamer before using it
